@@ -6,19 +6,14 @@ video::-webkit-media-controls-enclosure {
   display: none !important;
 }
 
-/* Pastikan container video responsif */
+/* Pastikan container video responsif dan terpusat */
 #video-container {
   max-width: 100vw;
   max-height: 100vh;
   overflow: hidden;
-  display: block; /* Default untuk portrait, diubah ke flex untuk landscape via JS */
-}
-
-/* Styling video untuk memastikan centering */
-#video-player {
-  max-width: 100vw;
-  max-height: 100vh;
-  object-fit: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Custom styling untuk Plyr */
