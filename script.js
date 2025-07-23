@@ -113,13 +113,14 @@ if (videoId) {
         videoPlayer.src = video.Url;
         videoTitle.textContent = video.Judul;
       } else {
-        window.location.href = '/404.html';
+        console.error('video dengan id tersebut tidak di temukan');
+      
       }
     })
     .catch(error => {
       console.error('Error fetching video data:', error);
-      window.location.href = '/404.html';
+      
     });
 } else {
-  window.location.href = '/404.html';
+  console.error('Error tidak di temukan id');      
 }
