@@ -1,1 +1,58 @@
-p
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Video Player</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript">
+      (function (l) {
+        if (l.hash && l.hash.startsWith('#/')) {
+          const newPath = l.hash.replace('#', '');
+          window.location.replace(newPath);
+        }
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+  </script>
+</head>
+<body class="bg-black m-0 p-0 overflow-hidden">
+  <h1 id="video-title" class="hidden"></h1>
+  <div id="video-container" class="relative w-full h-screen">
+    <video
+      id="video-player"
+      class="w-full h-full object-contain"
+      playsinline
+      data-plyr-config='{
+        "controls": ["play", "progress", "current-time", "duration", "mute", "volume", "settings", "fullscreen"],
+        "settings": ["speed"],
+        "speed": {"selected": 1, "options": [0.5, 1, 1.5, 2]}
+      }'
+    ></video>
+    <div id="overlay-controls" class="absolute inset-0 flex items-center justify-center space-x-6 opacity-90 transition-all duration-300">
+      <button id="backward-btn" class="text-white bg-black bg-opacity-60 rounded-full p-3 hover:bg-opacity-80 hover:shadow-glow transition-transform hover:scale-110" title="Double-click to rewind 10 seconds">
+        <i class="fas fa-backward text-2xl"></i>
+      </button>
+      <button id="play-overlay-btn" class="text-white bg-black bg-opacity-60 rounded-full p-5 hover:bg-opacity-80 hover:shadow-glow transition-transform hover:scale-110" title="Play/Pause">
+        <i class="fas fa-play text-5xl"></i>
+      </button>
+      <button id="forward-btn" class="text-white bg-black bg-opacity-60 rounded-full p-3 hover:bg-opacity-80 hover:shadow-glow transition-transform hover:scale-110" title="Double-click to forward 10 seconds">
+        <i class="fas fa-forward text-2xl"></i>
+      </button>
+    </div>
+  </div>
+  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
