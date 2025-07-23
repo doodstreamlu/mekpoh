@@ -2,8 +2,8 @@ const JSON_URL = 'https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/
 
 // Ambil video ID dari pathname
 const decodedPath = window.location.pathname.replace(/~and~/g, '&');
-const pathParts = decodedPath.split('/?/').pop().split('/');
-const videoId = pathParts[pathParts.length - 1]; // Ambil bagian terakhir setelah /e/
+const pathParts = decodedPath.split('/?/');
+const videoId = pathParts.length > 1 ? `/${pathParts[1]}` : decodedPath; // Ambil /e/<videoId>
 
 const videoPlayer = document.getElementById('video-player');
 const videoTitle = document.getElementById('video-title');
@@ -35,14 +35,23 @@ function showControls() {
   }
 }
 
-// Fungsi untuk memastikan overlay controls berada di tengah pada landscape
-function centerOverlayControls() {
+// Fungsi untuk memusatkan video dan overlay controls pada landscape
+function centerVideoAndControls() {
   const video = videoPlayer;
   const isLandscape = video.videoWidth > video.videoHeight;
   if (isLandscape) {
+    videoContainer.style.display = 'flex';
+    videoContainer.style.alignItems = 'center';
+    videoContainer.style.justifyContent = 'center';
+    video.style.maxWidth = '100%';
+    video.style.maxHeight = '100%';
     overlayControls.style.display = 'flex';
     overlayControls.style.alignItems = 'center';
     overlayControls.style.justifyContent = 'center';
+  } else {
+    videoContainer.style.display = 'block';
+    video.style.maxWidth = '100vw';
+    video.style.maxHeight = '100vh';
   }
 }
 
@@ -64,12 +73,12 @@ player.on('ready', () => {
     plyrControls.style.display = 'flex';
   }
   showControls(); // Tampilkan overlay dan Plyr controls saat video dimuat
-  centerOverlayControls(); // Pastikan overlay terpusat
+  centerVideoAndControls(); // Pastikan video dan overlay terpusat
 });
 
-// Perbarui posisi overlay saat metadata video dimuat
+// Perbarui posisi video dan overlay saat metadata video dimuat
 player.on('loadedmetadata', () => {
-  centerOverlayControls();
+  centerVideoAndControls();
 });
 
 // Toggle kontrol saat tombol play di tengah diklik
