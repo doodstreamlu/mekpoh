@@ -1,8 +1,8 @@
 const JSON_URL = 'https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json';
 
-// Ambil parameter v dari URL
-const urlParams = new URLSearchParams(window.location.search);
-const videoId = urlParams.get('v');
+// Ambil video ID dari pathname
+const pathParts = window.location.pathname.split('/');
+const videoId = pathParts[pathParts.length - 1]; // Ambil bagian terakhir setelah /e/
 
 const videoPlayer = document.getElementById('video-player');
 const videoTitle = document.getElementById('video-title');
@@ -13,17 +13,23 @@ const forwardBtn = document.getElementById('forward-btn');
 const videoContainer = document.getElementById('video-container');
 
 let hideControlsTimeout;
-let hasPlayed = false;
 
 // Fungsi untuk menampilkan kontrol sementara
-function showOverlayControls() {
+function showControls() {
   clearTimeout(hideControlsTimeout);
   overlayControls.style.opacity = '0.9';
   overlayControls.style.pointerEvents = 'auto';
+  const plyrControls = document.querySelector('.plyr__controls');
+  if (plyrControls) {
+    plyrControls.style.display = 'flex';
+  }
   if (player.playing) {
     hideControlsTimeout = setTimeout(() => {
       overlayControls.style.opacity = '0';
       overlayControls.style.pointerEvents = 'none';
+      if (plyrControls) {
+        plyrControls.style.display = 'none';
+      }
     }, 3000); // Sembunyikan setelah 3 detik
   }
 }
@@ -43,44 +49,41 @@ player.config.hideControls = true;
 player.on('ready', () => {
   const plyrControls = document.querySelector('.plyr__controls');
   if (plyrControls) {
-    plyrControls.style.display = 'none';
+    plyrControls.style.display = 'flex';
   }
-  showOverlayControls(); // Tampilkan overlay saat video dimuat
+  showControls(); // Tampilkan overlay dan Plyr controls saat video dimuat
 });
 
-// Tampilkan kontrol Plyr setelah video diputar pertama kali
+// Toggle kontrol saat tombol play di tengah diklik
+playOverlayBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  player.togglePlay();
+  if (player.playing) {
+    showControls(); // Mulai timer untuk menyembunyikan kontrol saat play
+  } else {
+    showControls(); // Tampilkan kontrol tanpa timer saat pause
+    clearTimeout(hideControlsTimeout); // Batalkan timer jika ada
+  }
+});
+
+// Toggle controls saat video diklik
+videoContainer.addEventListener('click', (e) => {
+  if (e.target.closest('#overlay-controls')) return;
+  showControls();
+});
+
+// Update ikon play/pause saat video diputar atau dijeda
 player.on('play', () => {
   playOverlayBtn.querySelector('i').classList.remove('fa-play');
   playOverlayBtn.querySelector('i').classList.add('fa-pause');
-  overlayControls.style.opacity = '0';
-  overlayControls.style.pointerEvents = 'none';
-  if (!hasPlayed) {
-    const plyrControls = document.querySelector('.plyr__controls');
-    if (plyrControls) {
-      plyrControls.style.display = 'flex';
-    }
-    hasPlayed = true;
-  }
+  showControls(); // Mulai timer untuk menyembunyikan kontrol
 });
 
 player.on('pause', () => {
   playOverlayBtn.querySelector('i').classList.remove('fa-pause');
   playOverlayBtn.querySelector('i').classList.add('fa-play');
-  showOverlayControls();
-});
-
-// Toggle kontrol Plyr dan overlay saat tombol play di tengah diklik
-playOverlayBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  player.togglePlay();
-});
-
-// Toggle overlay controls saat video diklik
-videoContainer.addEventListener('click', (e) => {
-  if (e.target.closest('#overlay-controls')) return;
-  if (player.playing) {
-    showOverlayControls();
-  }
+  showControls(); // Tampilkan kontrol tanpa timer
+  clearTimeout(hideControlsTimeout); // Batalkan timer
 });
 
 // Fungsi untuk mendeteksi double-click
@@ -93,7 +96,7 @@ backwardBtn.addEventListener('click', (e) => {
   const currentTime = Date.now();
   if (currentTime - lastClickTimeBackward < DOUBLE_CLICK_THRESHOLD) {
     player.currentTime = Math.max(0, player.currentTime - 10);
-    showOverlayControls(); // Tampilkan kontrol setelah skip
+    showControls(); // Tampilkan kontrol setelah skip
   }
   lastClickTimeBackward = currentTime;
 });
@@ -103,7 +106,7 @@ forwardBtn.addEventListener('click', (e) => {
   const currentTime = Date.now();
   if (currentTime - lastClickTimeForward < DOUBLE_CLICK_THRESHOLD) {
     player.currentTime = Math.min(player.duration, player.currentTime + 10);
-    showOverlayControls(); // Tampilkan kontrol setelah skip
+    showControls(); // Tampilkan kontrol setelah skip
   }
   lastClickTimeForward = currentTime;
 });
