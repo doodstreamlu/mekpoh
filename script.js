@@ -1,8 +1,15 @@
 const JSON_URL = 'https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json';
 
-// Ambil video ID dari pathname
+// Ambil video ID dari pathname atau query parameter
+let videoId;
 const pathParts = window.location.pathname.split('/');
-const videoId = pathParts[pathParts.length - 1] === 'e' ? pathParts[pathParts.length - 2] : pathParts[pathParts.length - 1];
+const queryParams = new URLSearchParams(window.location.search);
+if (queryParams.has('')) {
+  const queryPath = queryParams.get('').split('/').filter(segment => segment);
+  videoId = queryPath[queryPath.length - 1] === 'e' ? queryPath[queryPath.length - 2] : queryPath[queryPath.length - 1];
+} else {
+  videoId = pathParts[pathParts.length - 1] === 'e' ? pathParts[pathParts.length - 2] : pathParts[pathParts.length - 1];
+}
 
 const videoPlayer = document.getElementById('video-player');
 const videoTitle = document.getElementById('video-title');
