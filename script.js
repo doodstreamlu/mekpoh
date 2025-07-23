@@ -2,7 +2,7 @@ const JSON_URL = 'https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/
 
 // Ambil video ID dari pathname
 const pathParts = window.location.pathname.split('/');
-const videoId = pathParts[pathParts.length - 1]; // Ambil bagian terakhir (ULfESVEvS1)
+const videoId = pathParts[pathParts.length - 1] === 'e' ? pathParts[pathParts.length - 2] : pathParts[pathParts.length - 1];
 
 const videoPlayer = document.getElementById('video-player');
 const videoTitle = document.getElementById('video-title');
@@ -14,7 +14,7 @@ const videoContainer = document.getElementById('video-container');
 
 let hideControlsTimeout;
 
-// Fungsi untuk menampilkan kontrol overlay sementara
+// Fungsi untuk menampilkan overlay controls sementara
 function showOverlayControls() {
   clearTimeout(hideControlsTimeout);
   overlayControls.style.opacity = '0.9';
@@ -37,7 +37,7 @@ const player = new Plyr(videoPlayer, {
   muted: true
 });
 
-// Pastikan kontrol Plyr selalu aktif
+// Pastikan Plyr controls selalu aktif
 player.on('ready', () => {
   const plyrControls = document.querySelector('.plyr__controls');
   if (plyrControls) {
@@ -46,28 +46,15 @@ player.on('ready', () => {
   showOverlayControls(); // Tampilkan overlay saat video dimuat
 });
 
-// Pusatkan video jika landscape
-player.on('loadedmetadata', () => {
-  const videoWidth = videoPlayer.videoWidth;
-  const videoHeight = videoPlayer.videoHeight;
-  if (videoWidth > videoHeight) {
-    videoContainer.classList.add('flex', 'justify-center', 'items-center');
-    videoPlayer.classList.add('max-w-full', 'max-h-full');
-  } else {
-    videoContainer.classList.remove('flex', 'justify-center', 'items-center');
-    videoPlayer.classList.remove('max-w-full', 'max-h-full');
-  }
-});
-
-// Toggle kontrol overlay saat tombol play di tengah diklik
+// Toggle overlay controls saat tombol play di tengah diklik
 playOverlayBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   player.togglePlay();
   if (player.playing) {
-    showOverlayControls(); // Mulai timer untuk menyembunyikan overlay saat play
+    showOverlayControls(); // Mulai timer untuk menyembunyikan overlay
   } else {
     showOverlayControls(); // Tampilkan overlay tanpa timer saat pause
-    clearTimeout(hideControlsTimeout); // Batalkan timer jika ada
+    clearTimeout(hideControlsTimeout); // Batalkan timer
   }
 });
 
@@ -124,33 +111,15 @@ if (videoId) {
       const video = data.find(v => v.id === videoId);
       if (video) {
         videoPlayer.src = video.Url;
-        videoTitle.textContent =’inf
-
-### Explanation of Changes:
-- **Pathname Handling**:
-  - Updated the video ID extraction to use `window.location.pathname.split('/')` and take the last segment (`pathParts[pathParts.length - 1]`), which works for both `/ULfESVEvS1` and `/e/ULfESVEvS1` since the ID is the final segment.
-- **Landscape Video Centering**:
-  - Added a `loadedmetadata` event listener to check `videoWidth > videoHeight`.
-  - If true (landscape), added Tailwind classes (`flex`, `justify-center`, `items-center`) to `videoContainer` and `max-w-full`, `max-h-full` to `videoPlayer` to center the video.
-  - If not landscape, these classes are removed to maintain the original `object-contain` behavior.
-- **Plyr Controls**:
-  - Removed the `hideControls` configuration and ensured the Plyr control bar is always visible by setting `display: flex` in the `ready` event and removing any code that hides it.
-  - The `showOverlayControls` function now only manages the overlay controls, leaving the Plyr control bar unaffected.
-- **Other Functionality**:
-  - Maintained the 3-second overlay control display on video click or skip during playback.
-  - Kept the overlay controls visible without a timeout when paused or initially loaded.
-  - Preserved double-click functionality for backward/forward buttons and no autoplay.
-- **Styling**: The `style.css` remains unchanged, retaining the "cool" design with blur, glow animations, and smooth transitions.
-
-### How It Works:
-- **Video ID**: Extracted from the pathname's last segment (e.g., `ULfESVEvS1` from `/e/ULfESVEvS1` or `/ULfESVEvS1`).
-- **Video Centering**: Landscape videos are centered using flexbox; portrait videos use the full container.
-- **Controls**:
-  - The Plyr control bar is always visible, allowing volume control, seeking, etc.
-  - Overlay controls appear for 3 seconds when the video is clicked during playback or after a skip, and remain visible when paused or initially loaded.
-- **Behavior**:
-  - The video starts paused, requiring user interaction to play.
-  - Double-clicking backward/forward buttons skips 10 seconds and shows the overlay controls briefly.
-- **Styling**: The sleek look with frosted glass and glowing buttons is unchanged.
-
-Let me know if you need further adjustments, such as changing the timeout duration, tweaking the centering logic, or enhancing the styling!
+        videoTitle.textContent = video.Judul;
+      } else {
+        window.location.href = '/404.html';
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching video data:', error);
+      window.location.href = '/404.html';
+    });
+} else {
+  window.location.href = '/404.html';
+}
