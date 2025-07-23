@@ -1,7 +1,8 @@
 const JSON_URL = 'https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json';
 
 // Ambil video ID dari pathname
-const pathParts = window.location.pathname.split('/');
+const decodedPath = window.location.pathname.replace(/~and~/g, '&');
+const pathParts = decodedPath.split('/?/').pop().split('/');
 const videoId = pathParts[pathParts.length - 1]; // Ambil bagian terakhir setelah /e/
 
 const videoPlayer = document.getElementById('video-player');
@@ -34,6 +35,17 @@ function showControls() {
   }
 }
 
+// Fungsi untuk memastikan overlay controls berada di tengah pada landscape
+function centerOverlayControls() {
+  const video = videoPlayer;
+  const isLandscape = video.videoWidth > video.videoHeight;
+  if (isLandscape) {
+    overlayControls.style.display = 'flex';
+    overlayControls.style.alignItems = 'center';
+    overlayControls.style.justifyContent = 'center';
+  }
+}
+
 // Inisialisasi Plyr
 const player = new Plyr(videoPlayer, {
   controls: ['play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
@@ -52,6 +64,12 @@ player.on('ready', () => {
     plyrControls.style.display = 'flex';
   }
   showControls(); // Tampilkan overlay dan Plyr controls saat video dimuat
+  centerOverlayControls(); // Pastikan overlay terpusat
+});
+
+// Perbarui posisi overlay saat metadata video dimuat
+player.on('loadedmetadata', () => {
+  centerOverlayControls();
 });
 
 // Toggle kontrol saat tombol play di tengah diklik
