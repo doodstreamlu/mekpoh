@@ -3,38 +3,126 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Video Player</title>
+  <title>Professional Video Player</title>
+  <script type="text/javascript">
+      (function (l) {
+        if (l.hash && l.hash.startsWith('#/')) {
+          const newPath = l.hash.replace('#', '');
+          window.location.replace(newPath);
+        }
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
-  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Mencegah scroll */
+    }
+    #video-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* Pastikan elemen video mengisi kontainernya */
+    #video-player {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
-<body class="bg-black m-0 p-0 overflow-hidden">
-  <h1 id="video-title" class="hidden"></h1>
-  <div id="video-container" class="relative w-full h-screen flex items-center justify-center">
-    <video
-      id="video-player"
-      class="w-full h-full object-contain"
-      playsinline
-      data-plyr-config='{
-        "controls": ["play", "progress", "current-time", "duration", "mute", "volume", "settings", "fullscreen"],
-        "settings": ["speed"],
-        "speed": {"selected": 1, "options": [0.5, 1, 1.5, 2]}
-      }'
-    ></video>
-    <div id="overlay-controls" class="absolute inset-0 flex items-center justify-center space-x-6 opacity-90 transition-all duration-300">
-      <button id="backward-btn" class="text-white bg-black bg-opacity-60 rounded-full p-3 hover:bg-opacity-80 hover:shadow-glow transition-transform hover:scale-110" title="Double-click to rewind 10 seconds">
-        <i class="fas fa-backward text-2xl"></i>
-      </button>
-      <button id="play-overlay-btn" class="text-white bg-black bg-opacity-60 rounded-full p-5 hover:bg-opacity-80 hover:shadow-glow transition-transform hover:scale-110" title="Play/Pause">
-        <i class="fas fa-play text-5xl"></i>
-      </button>
-      <button id="forward-btn" class="text-white bg-black bg-opacity-60 rounded-full p-3 hover:bg-opacity-80 hover:shadow-glow transition-transform hover:scale-110" title="Double-click to forward 10 seconds">
-        <i class="fas fa-forward text-2xl"></i>
-      </button>
-    </div>
+<body class="bg-black m-0 p-0 font-sans">
+  <div id="video-container">
+    <video id="video-player" controls preload="auto"></video>
   </div>
-  <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-  <script src="script.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const videoId = window.location.pathname.substring(1); // Mendapatkan ID dari URL (contoh: mydomain.com/vYPd9nneGP -> vYPd9nneGP)
+      const videoPlayer = document.getElementById('video-player');
+
+      if (!videoId) {
+        console.error('ID video tidak ditemukan di URL.');
+        // Tampilkan pesan error atau redirect jika ID tidak ada
+        videoPlayer.src = ''; // Kosongkan src untuk mencegah error player
+        return;
+      }
+
+      try {
+        const response = await axios.get('https://raw.githubusercontent.com/DoodstreamPro/_e/refs/heads/main/Video.json');
+        const videos = response.data;
+
+        const foundVideo = videos.find(video => video.id === videoId);
+
+        if (foundVideo) {
+          videoPlayer.src = foundVideo.Url;
+          
+          // Inisialisasi Fluid Player setelah setting src
+          fluidPlayer(
+            'video-player',
+            {
+              "layoutControls": {
+                "controlBar": {
+                  "autoHideTimeout": 3,
+                  "animated": true,
+                  "autoHide": true,
+                  // Pastikan semua komponen kontrol diaktifkan jika Fluid Player mendukungnya
+                  "fullscreen": true,
+                  "playPause": true,
+                  "progress": true,
+                  "volume": true, // Pastikan ini true
+                  "playbackRates": true,
+                  "theatreMode": true,
+                  "download": false // Ini sesuai preferensi Anda
+                },
+                "htmlOnPauseBlock": {
+                  "html": null,
+                  "height": null,
+                  "width": null
+                },
+                "autoPlay": true, // Mengatur autoplay agar langsung memutar video
+                "mute": false, // Pastikan ini false agar volume tidak ter-mute secara default
+                "allowTheatre": true,
+                "playPauseAnimation": true,
+                "playbackRateEnabled": true,
+                "allowDownload": false,
+                "playButtonShowing": true,
+                "fillToContainer": true, // Memastikan video mengisi kontainer
+                "posterImage": ""
+              },
+              "vastOptions": {
+                "adList": [],
+                "adCTAText": false,
+                "adCTATextPosition": ""
+              }
+            }
+          );
+          console.log(`Memuat video: ${foundVideo.Judul} - ${foundVideo.Url}`);
+        } else {
+          console.error(`Video dengan ID ${videoId} tidak ditemukan dalam data JSON.`);
+          videoPlayer.src = ''; // Kosongkan src jika video tidak ditemukan
+        }
+      } catch (error) {
+        console.error('Terjadi kesalahan saat mengambil data JSON:', error);
+        videoPlayer.src = ''; // Kosongkan src jika terjadi error fetch
+      }
+    });
+  </script>
 </body>
 </html>
